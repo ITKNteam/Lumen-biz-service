@@ -196,7 +196,7 @@ class ProfileService
      */
     public function setPasswordApplyByPhone(array $params)
     {
-        $phoneNumber = $params['pnone'];
+        $phoneNumber = $params['phone'];
         $password = $params['password'];
         $rePassword = $params['rePassword'];
         $code = $params['code'];
@@ -219,7 +219,7 @@ class ProfileService
                 404);
         }
         $user->setPassword(password_hash($password, PASSWORD_BCRYPT));
-        $phone->setActive(User::IS_ACTIVE);
+        $phone->setIsActive(User::IS_ACTIVE);
         $phone->setHash('');
 
         if (!($user->save() && $phone->save())) {
@@ -427,7 +427,7 @@ class ProfileService
         $userId = $bindUserId ?? false;
 
         if ($phone) {
-            if ($phone->isActive() === User::IS_ACTIVE) {
+            if ($phone->getIsActive() === User::IS_ACTIVE) {
                 return new ResultDTO(ResultDTO::FAIL,
                     'Пользователь существует');
             } else {
@@ -442,7 +442,7 @@ class ProfileService
         } else {
             if ($userId === 0) {
                 $user = new User();
-                $user->login = $countryCode . $phoneNumber;
+                $user->setLogin($countryCode . $phoneNumber);
 
                 if (!$user->save()) {
                     return new ResultDTO(ResultDTO::FAIL,
@@ -453,10 +453,10 @@ class ProfileService
             }
 
             $phone = new UserPhone();
-            $phone->number = $phoneNumber;
-            $phone->country_code = $countryCode;
-            $phone->is_active = User::IS_NOT_ACTIVE;
-            $phone->user_id = $userId;
+            $phone->setNumber($phoneNumber);
+            $phone->setCountryCode($countryCode);
+            $phone->setIsActive(User::IS_NOT_ACTIVE);
+            $phone->setUserId($userId);
         }
 
         $smsCode = rand(1000, 9999);
