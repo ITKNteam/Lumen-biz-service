@@ -97,6 +97,8 @@ $app->configure('app');
  $app->register(Barryvdh\Omnipay\ServiceProvider::class);
 
 
+
+
 /*
 |--------------------------------------------------------------------------
 | Load The Application Routes

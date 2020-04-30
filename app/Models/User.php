@@ -20,7 +20,7 @@ class User extends Model
     const IS_ACTIVE = 1;
 
 
-    protected $table = 'users';
+    protected $table = 'biz_users';
     protected $primaryKey = 'id';
 
     public function phone()
@@ -43,21 +43,170 @@ class User extends Model
         return $this->hasOne('App\Models\UserPushToken');
     }
 
-    /*
-    protected $attributes = [
-        'id' => 'id',
-        'login' => 'login',
-        'password' => 'password',
-        'is_android' => 'isAndroid',
-        'is_confirm_term' => 'isConfirmTerm',
-        'balance' => 'balance',
-        'tariff_id' => 'tariffId',
-        'currency_id' => 'currencyId',
-        'payment_system_status' => 'paymentSystemStatus',
-        'created_at' => 'createdAt',
-        'updated_at' => 'updatedAt',
-    ];
-*/
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLogin()
+    {
+        return $this->login;
+    }
+
+    /**
+     * @param mixed $login
+     */
+    public function setLogin($login): void
+    {
+        $this->login = $login;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPassword()
+    {
+        return $this->password;
+    }
+
+    /**
+     * @param mixed $password
+     */
+    public function setPassword($password): void
+    {
+        $this->password = $password;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getIsAndroid()
+    {
+        return $this->is_android;
+    }
+
+    /**
+     * @param mixed $isAndroid
+     */
+    public function setIsAndroid($isAndroid): void
+    {
+        $this->is_android = $isAndroid;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getIsConfirmTerm()
+    {
+        return $this->is_confirm_term;
+    }
+
+    /**
+     * @param mixed $isConfirmTerm
+     */
+    public function setIsConfirmTerm($isConfirmTerm): void
+    {
+        $this->is_confirm_term = $isConfirmTerm;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getBalance()
+    {
+        return $this->balance;
+    }
+
+    /**
+     * @param mixed $balance
+     */
+    public function setBalance($balance): void
+    {
+        $this->balance = $balance;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTariffId()
+    {
+        return $this->tariff_id;
+    }
+
+    /**
+     * @param mixed $tariffId
+     */
+    public function setTariffId($tariffId): void
+    {
+        $this->tariff_id = $tariffId;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCurrencyId()
+    {
+        return $this->currency_id;
+    }
+
+    /**
+     * @param mixed $currencyId
+     */
+    public function setCurrencyId($currencyId): void
+    {
+        $this->currency_id = $currencyId;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPaymentSystemStatus()
+    {
+        return $this->payment_system_status;
+    }
+
+    /**
+     * @param mixed $paymentSystemStatus
+     */
+    public function setPaymentSystemStatus($paymentSystemStatus): void
+    {
+        $this->payment_system_status = $paymentSystemStatus;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCreatedAt()
+    {
+        return $this->created_at;
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updated_at;
+    }
+
+    public function getData(): array
+    {
+        return [
+            'id'           => $this->getId(),
+            'registerAt'   => $this->getCreatedAt(),
+            'lastActivity' => $this->getUpdatedAt(),
+            'tariff_id'    => $this->getTariffId(),
+            'balance'      => $this->getBalance(),
+            'robokassaStatus'  => $this->getPaymentSystemStatus()
+        ];
+    }
+
+
+
 
     /**
      * @return array

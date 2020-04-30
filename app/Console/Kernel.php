@@ -14,7 +14,8 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         Commands\OmnipayCommand::class,
-        Commands\ProfileTestCommand::class
+        Commands\ProfileTestCommand::class,
+        Commands\TestCommand::class
         //
     ];
 
