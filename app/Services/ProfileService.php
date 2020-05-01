@@ -252,8 +252,7 @@ class ProfileService
 
         $resActivateEmail = $this->activateEmail($hash);
         if ($resActivateEmail->isSuccess()) {
-            $userId = $this->activateEmail($hash)
-                          ->getResult()['data']['userId'];
+            $userId = $resActivateEmail->getResult()['data']['userId'];
         } else {
             return $resActivateEmail;
         }
@@ -538,20 +537,20 @@ class ProfileService
         $email = UserEmail::where('hash', $hash)->first();
 
         if (!$email) {
-            return new ResultDTO(ResultDTO::FAIL, 'Ошибка, email не найден');
+            return new ResultDTO(ResultDTO::FAIL, 'Ошибка, email не найден', [], 404);
         }
 
         $userId = $email->user_id;
 
         if (!$this->disableUserEmail($userId)->isSuccess()) {
             return new ResultDTO(ResultDTO::FAIL,
-                'Ошибка, обновления статусов email');
+                'Ошибка, обновления статусов email', [], 500);
         }
 
         $email->is_active = User::IS_ACTIVE;
         $email->hash = '';
         if (!$email->save()) {
-            return new ResultDTO(ResultDTO::FAIL, 'Ошибка, обновления email');
+            return new ResultDTO(ResultDTO::FAIL, 'Ошибка, обновления email', [], 500);
         }
 
         UserEmail::where('user_id', $userId)

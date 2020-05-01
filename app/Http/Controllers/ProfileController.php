@@ -203,7 +203,6 @@ class ProfileController extends Controller
      */
     public function addEmailToUser(Request $request)
     {
-
         if (!$request->has(['email', 'userId'])) {
             return response((new ResultDTO(0, 'fields is requried',
                 [], 400))->getResult(), 400);
