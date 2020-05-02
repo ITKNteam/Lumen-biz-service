@@ -20,7 +20,7 @@ class User extends Model
     const IS_ACTIVE = 1;
 
 
-    protected $table = 'biz_users';
+    protected $table = 'qlick.biz_users';
     protected $primaryKey = 'id';
 
     public function phone()

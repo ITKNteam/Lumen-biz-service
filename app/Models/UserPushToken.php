@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserPushToken extends Model
 {
-    protected $table = 'biz_users_push_token';
+    protected $table = 'qlick.biz_users_push_token';
     protected $primaryKey = 'id';
 
     /**

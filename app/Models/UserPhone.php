@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserPhone extends Model
 {
-    protected $table = 'biz_users_phones';
+    protected $table = 'qlick.biz_users_phones';
     protected $primaryKey = 'id';
 
 
