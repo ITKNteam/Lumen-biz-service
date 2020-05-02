@@ -1,47 +1,49 @@
 <?php
 
+$router->group(['prefix' => '/profile'], function () use ($router) {
+    $router->get('', 'ProfileController@index');
 
+    $router->get('/users', 'ProfileController@getUsers');
+    $router->get('/{id}', 'ProfileController@getUserById');
 
-$router->get('/profile', 'ProfileController@index');
+    $router->post('/create', 'ProfileController@createUser');
+    $router->post('/login', 'ProfileController@login');
 
+    $router->put('/update', 'ProfileController@updateUser');
 
-$router->get('/profile/users', 'ProfileController@getUsers');
-$router->get('/profile/{id}', 'ProfileController@getUserById');
+    $router->post('/setPasswordApplyByPhone', 'ProfileController@setPasswordApplyByPhone');
+    $router->post('/setPasswordApplyByEmail', 'ProfileController@setPasswordApplyByEmail');
 
+    $router->post('/addEmailToUser', 'ProfileController@addEmailToUser');
+    $router->post('/activateEmail', 'ProfileController@activateEmail');
+    $router->post('/generateEmailResetHash', 'ProfileController@generateEmailResetHash');
 
+    $router->post('/addPhoneToUser', 'ProfileController@addPhoneToUser');
+    $router->post('/activatePhone', 'ProfileController@activatePhone');
+    $router->post('/generatePhoneResetHash', 'ProfileController@generatePhoneResetHash');
 
-$router->post('/profile/create', 'ProfileController@createUser');
-$router->post('/profile/login', 'ProfileController@login');
+    $router->post('/deleteUserByPhone', 'ProfileController@deleteUserByPhone');
 
-$router->put('/profile/update', 'ProfileController@updateUser');
+    $router->post('/setPushToken', 'ProfileController@setPushToken');
 
-$router->post('/profile/setPasswordApplyByPhone', 'ProfileController@setPasswordApplyByPhone');
-$router->post('/profile/setPasswordApplyByEmail', 'ProfileController@setPasswordApplyByEmail');
-
-$router->post('/profile/addEmailToUser', 'ProfileController@addEmailToUser');
-$router->post('/profile/activateEmail', 'ProfileController@activateEmail');
-$router->post('/profile/generateEmailResetHash', 'ProfileController@generateEmailResetHash');
-
-$router->post('/profile/addPhoneToUser', 'ProfileController@addPhoneToUser');
-$router->post('/profile/activatePhone', 'ProfileController@activatePhone');
-$router->post('/profile/generatePhoneResetHash', 'ProfileController@generatePhoneResetHash');
-
-$router->post('/profile/deleteUserByPhone', 'ProfileController@deleteUserByPhone');
-
-$router->post('/profile/setPushToken', 'ProfileController@setPushToken');
-
-$router->post('/profile/create/promo', 'ProfileController@createUserFromPromo');
+    $router->post('/create/promo', 'ProfileController@createUserFromPromo');
 
 //******
 //short mobile creation
 //
-$router->post('/profile/m/create', 'ProfileController@mobileCreateUser');
+    $router->post('/m/create', 'ProfileController@mobileCreateUser');
 
-$router->post('/profile/m/registration', 'ProfileController@mobileRegistartionUser');
+    $router->post('/m/registration', 'ProfileController@mobileRegistartionUser');
 
-$router->post('/profile/m/confirmTerm', 'ProfileController@mobileConfirmTerm');
+    $router->post('/m/confirmTerm', 'ProfileController@mobileConfirmTerm');
 
-$router->post('/profile/m/smsCode', 'ProfileController@getSmsCode');
+    $router->post('/m/smsCode', 'ProfileController@getSmsCode');
 
-$router->post('/profile/m/login', 'ProfileController@mobileLogin');
+    $router->post('/m/login', 'ProfileController@mobileLogin');
+});
+
+
+
+
+
 
