@@ -9,13 +9,13 @@ use App\Models\UserPhone;
 use App\Models\User;
 use App\Models\UserProfile;
 use App\Models\UserPushToken;
+use Exception;
 
 
-class ProfileService
-{
+class ProfileService {
     /**
      * @param string $login
-     * @param bool   $isEmail
+     * @param bool $isEmail
      * @param string $phoneCountryCode
      *
      * @return ResultDTO
@@ -36,8 +36,7 @@ class ProfileService
      *
      * @return ResultDTO
      */
-    public function getUser(int $id)
-    {
+    public function getUser(int $id) {
         $user = User::find($id);
         if ($user === null) {
             return new ResultDTO(ResultDTO::FAIL, 'Пользователь не найден', [],
@@ -86,8 +85,7 @@ class ProfileService
      *
      * @return ResultDTO
      */
-    public function updateUser($id, $params)
-    {
+    public function updateUser($id, $params) {
         $user = User::find($id);
         if ($user === null) {
             return new ResultDTO(ResultDTO::FAIL, 'Пользователь не найден', [],
@@ -134,25 +132,24 @@ class ProfileService
     }
 
 
-
     /**
      * @param array $params
      *
      * @return ResultDTO
      */
-    public function findUserLoginPassword(array $params)
-    {
+    public function findUserLoginPassword(array $params) {
 
         $login = $params['login'];
         $password = $params['password'];
         $loginIs = $params['loginIs'];
-        $phoneCountryCode = $params['phoneCountryCode'];
 
         $userId = null;
         if ($loginIs === 'phone') {
+            $phoneCountryCode = $params['phoneCountryCode'];
 
             $userPhone = UserPhone::where('number', $login)
                 ->where('country_code', $phoneCountryCode)->first();
+
             if ($userPhone != null) {
                 $userId = $userPhone->getUserId();
             }
@@ -175,10 +172,11 @@ class ProfileService
                 404);
         }
 
+
         if (password_verify($password, $user->getPassword())) {
             return new ResultDTO(ResultDTO::OK,
                 'Пользователь успешно вошел в систему', [
-                    'userId'      => $userId,
+                    'userId' => $userId,
                     'confirmTerm' => $user->getIsConfirmTerm()
                 ]);
 
@@ -194,8 +192,7 @@ class ProfileService
      *
      * @return ResultDTO
      */
-    public function setPasswordApplyByPhone(array $params)
-    {
+    public function setPasswordApplyByPhone(array $params) {
         $phoneNumber = $params['phone'];
         $password = $params['password'];
         $rePassword = $params['rePassword'];
@@ -239,8 +236,7 @@ class ProfileService
      *
      * @return ResultDTO
      */
-    public function setPasswordApplyByEmail(array $params)
-    {
+    public function setPasswordApplyByEmail(array $params): ResultDTO {
         $password = $params['password'];
         $rePassword = $params['password'];
         $hash = $params['hash'];
@@ -283,8 +279,7 @@ class ProfileService
      *
      * @return ResultDTO
      */
-    public function mobileConfirmTerm(int $userId)
-    {
+    public function mobileConfirmTerm(int $userId) {
         $user = User::find($userId);
         $user->setIsConfirmTerm(User::IS_ACTIVE);
         if (!($user->save())) {
@@ -301,8 +296,7 @@ class ProfileService
      *
      * @return ResultDTO
      */
-    public function deleteUserByPhone(string $phone)
-    {
+    public function deleteUserByPhone(string $phone) {
         try {
             $userPhone = UserPhone::where('phone', $phone)->firstOrFail();
 
@@ -321,8 +315,7 @@ class ProfileService
      *
      * @return ResultDTO
      */
-    public function savePushToken(array $params)
-    {
+    public function savePushToken(array $params) {
 
         $userId = $params['user_id'];
         $pushToken = $params['push_token'];
@@ -334,7 +327,7 @@ class ProfileService
             ->where('device_id', $deviceId)
             ->where('device_brand', $deviceBrand)->first();
 
-        if ($userPushToken == null){
+        if ($userPushToken == null) {
             $userPushToken = new UserPushToken();
             $userPushToken->setUserId($userId);
         }
@@ -344,8 +337,7 @@ class ProfileService
         $userPushToken->setDeviceBrand($deviceBrand);
         $userPushToken->setIsAndroid($isAndroid);
 
-        if (!$userPushToken->save())
-        {
+        if (!$userPushToken->save()) {
             return new ResultDTO(ResultDTO::FAIL,
                 'Ошибка сохранения пуштокена', []);
         }
@@ -361,8 +353,7 @@ class ProfileService
      *
      * @return ResultDTO
      */
-    public function generateEmailHash(string $email)
-    {
+    public function generateEmailHash(string $email) {
         $userEmail = UserEmail::where('email', $email)->first();
         if ($userEmail === null) {
             return new ResultDTO(ResultDTO::FAIL,
@@ -386,8 +377,7 @@ class ProfileService
      *
      * @return ResultDTO
      */
-    public function generatePhoneHash(string $phone, string $countryCode)
-    {
+    public function generatePhoneHash(string $phone, string $countryCode) {
         $userPhone = UserPhone::where('email', $phone)
             ->where('country_code', $countryCode)->first();
         if ($userPhone === null) {
@@ -412,50 +402,43 @@ class ProfileService
 
 
     /**
-     * @param $login
-     * @param $phoneCountryCode
-     * @param $bindUserId
-     *
+     * @param $phoneNumber
+     * @param $countryCode
      * @return ResultDTO
+     * @throws Exception
      */
-    public function bindPhoneToUser($phoneNumber, $countryCode, $bindUserId)
-    {
+    public function bindPhoneToUser($phoneNumber, $countryCode): ResultDTO {
 
         $phone = UserPhone::where('number', $phoneNumber)
             ->where('country_code', $countryCode)->first();
-        $userId = $bindUserId ?? false;
+
+        $userId = null;
 
         if ($phone) {
             if ($phone->getIsActive() === User::IS_ACTIVE) {
-                return new ResultDTO(ResultDTO::FAIL,
-                    'Пользователь существует');
-            } else {
-                return new ResultDTO(ResultDTO::FAIL,
-                    'Пользователь существует но телефон не поддвержден');
+                return new ResultDTO(ResultDTO::FAIL, 'Пользователь существует');
             }
 
-            if (!$userId) {
-                $userId = $phone->user_id;
-            }
-
+            $userId = $phone->getUserId();
         } else {
-            if ($userId === 0) {
-                $user = new User();
-                $user->setLogin($countryCode . $phoneNumber);
+            $user = new User();
+            $user->setLogin($countryCode . $phoneNumber);
 
-                if (!$user->save()) {
-                    return new ResultDTO(ResultDTO::FAIL,
-                        'Ошибка сохранения пользователя');
-                }
-
-                $userId = $user->id;
+            if (!$user->save()) {
+                return new ResultDTO(ResultDTO::FAIL,
+                    'Ошибка сохранения пользователя');
             }
+            $userId = $user->id;
 
             $phone = new UserPhone();
             $phone->setNumber($phoneNumber);
             $phone->setCountryCode($countryCode);
             $phone->setIsActive(User::IS_NOT_ACTIVE);
             $phone->setUserId($userId);
+        }
+
+        if (!$userId) {
+            throw new Exception('Var userId is null');
         }
 
         $smsCode = rand(1000, 9999);
@@ -467,14 +450,14 @@ class ProfileService
         }
 
         return new ResultDTO(ResultDTO::OK, 'ok phone', [
-            'hash'   => $smsCode,
+            'hash' => $smsCode,
             'userId' => $userId
         ]);
     }
 
     /**
      * @param string $emailStr
-     * @param int    $bindUserId
+     * @param int $bindUserId
      *
      * @return ResultDTO
      */
@@ -486,34 +469,25 @@ class ProfileService
 
         $userId = $bindUserId ?? false;
 
-        if ($email) {
-            if ($email->isActive() === User::IS_ACTIVE) {
-                return new ResultDTO(ResultDTO::FAIL,
-                    'Пользователь существует');
-            } else {
-                return new ResultDTO(ResultDTO::FAIL,
-                    'Пользователь существует но email  не подтвержден');
-            }
-
-            if (!$userId) {
-                $userId = $email->getUserId();
-            }
-        } else {
-            if (!$userId) {
-                $user = new User();
-                $user->setLogin($emailStr);
-                if (!$user->save()) {
-                    return new ResultDTO(ResultDTO::FAIL,
-                        'Ошибка сохранения пользователя');
-                }
-                $userId = $user->getId();
-            }
-
-            $email = new UserEmail();
-            $email->setEmail($emailStr);
-            $email->setIsActive(User::IS_NOT_ACTIVE);
-            $email->setUserId($userId);
+        if ($email && ($email->isActive() === User::IS_ACTIVE)) {
+            return new ResultDTO(ResultDTO::FAIL,
+                'Пользователь существует');
         }
+
+        if (!$userId) {
+            $user = new User();
+            $user->setLogin($emailStr);
+            if (!$user->save()) {
+                return new ResultDTO(ResultDTO::FAIL,
+                    'Ошибка сохранения пользователя');
+            }
+            $userId = $user->getId();
+        }
+
+        $email = new UserEmail();
+        $email->setEmail($emailStr);
+        $email->setIsActive(User::IS_NOT_ACTIVE);
+        $email->setUserId($userId);
 
         $email->setHashByEmail($emailStr);
         if (!$email->save()) {
@@ -522,7 +496,7 @@ class ProfileService
 
         return new ResultDTO(ResultDTO::OK,
             'Пользователь создан и email привязан', [
-                'hash'   => $email->getHash(),
+                'hash' => $email->getHash(),
                 'userId' => $userId
             ]);
     }
@@ -532,8 +506,7 @@ class ProfileService
      *
      * @return ResultDTO
      */
-    public function activateEmail(string $hash): ResultDTO
-    {
+    public function activateEmail(string $hash): ResultDTO {
         $email = UserEmail::where('hash', $hash)->first();
 
         if (!$email) {
@@ -565,8 +538,7 @@ class ProfileService
      *
      * @return ResultDTO
      */
-    public function disableUserEmail(int $userId): ResultDTO
-    {
+    public function disableUserEmail(int $userId): ResultDTO {
         $emails = UserEmail::where('user_id', $userId)->get();
         foreach ($emails as $email) {
             $email->is_active = User::IS_NOT_ACTIVE;
@@ -583,8 +555,7 @@ class ProfileService
      *
      * @return ResultDTO
      */
-    public function disableUserPhone(int $userId)
-    {
+    public function disableUserPhone(int $userId) {
         $phones = UserPhone::where('user_id', $userId)->get();
         foreach ($phones as $phone) {
             $phone->setActive(User::IS_NOT_ACTIVE);
@@ -604,8 +575,7 @@ class ProfileService
      *
      * @return ResultDTO
      */
-    public function activatePhone(string $phoneNumber, string $code)
-    {
+    public function activatePhone(string $phoneNumber, string $code) {
         $phone = UserPhone::where('hash',
             $this->getHashPhone($phoneNumber, $code))->first();
 
@@ -647,8 +617,7 @@ class ProfileService
      *
      * @return string
      */
-    private function getHashPhone($phoneNumber, $code)
-    {
+    private function getHashPhone($phoneNumber, $code) {
         return md5($phoneNumber . 'salt' . $code);
     }
 
@@ -701,6 +670,4 @@ class ProfileService
         ]);
 
     }
-
-
 }

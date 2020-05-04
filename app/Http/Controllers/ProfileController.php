@@ -40,22 +40,24 @@ class ProfileController extends Controller
             return response((new ResultDTO(0, 'fields login and loginIs requried',
                 [], 400))->getResult(), 400);
         }
+
         if (!in_array($request->input('loginIs'), ['email', 'phone'])) {
             return response((new ResultDTO(0,
                     'Value loginIs not in values phone or email', [],
                     400))->getResult(), 400);
         }
+
         $login = $request->input('login');
         $isEmail = $request->input('loginIs') === 'email';
         $phoneCountryCode = $request->input('phoneCountryCode', '7');
-        $result = $this->profileService->createUser($login, $isEmail,
-            $phoneCountryCode);
+
+        $result = $this->profileService->createUser($login, $isEmail, $phoneCountryCode);
+
         if ($result->isSuccess()){
             return $result->getResult();
         } else {
             return response($result->getResult(), $result->getResult()['code']?? 500);
         }
-
     }
 
     /**
@@ -97,19 +99,23 @@ class ProfileController extends Controller
      * @return array|\Illuminate\Http\Response|\Laravel\Lumen\Http\ResponseFactory
      */
     public function login(Request $request) {
+        $isReqFields = ['login', 'password', 'loginIs'];
 
-        if (!$request->has(['login', 'password', 'loginIs', 'phoneCountryCode'])) {
-            return response((new ResultDTO(0, 'fields is requried',
-                [], 400))->getResult(), 400);
+        if ($request->get('loginIs') === 'phone') {
+            $isReqFields[] = 'phoneCountryCode';
+        }
+
+        if (!$request->has($isReqFields)) {
+            return response((new ResultDTO(0, 'fields is requried', $isReqFields, 400))->getResult(), 400);
         }
 
         $result = $this->profileService->findUserLoginPassword($request->input());
+
         if ($result->isSuccess()){
             return $result->getResult();
         } else {
             return response($result->getResult(), $result->getResult()['code']?? 500);
         }
-
     }
 
     /**
