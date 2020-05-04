@@ -462,16 +462,18 @@ class ProfileService {
      * @return ResultDTO
      */
     public function bindEmailToUser(
-        string $emailStr,
-        int $bindUserId
+        string $emailStr
     ): ResultDTO {
         $email = UserEmail::where('email', $emailStr)->first();
 
-        $userId = $bindUserId ?? false;
+        $userId = null;
 
-        if ($email && ($email->isActive() === User::IS_ACTIVE)) {
-            return new ResultDTO(ResultDTO::FAIL,
-                'Пользователь существует');
+        if ($email) {
+            if ($email->isActive() === User::IS_ACTIVE) {
+                return new ResultDTO(ResultDTO::FAIL, 'Пользователь существует');
+            }
+
+            $userId = $email->getUserId();
         }
 
         if (!$userId) {
@@ -482,13 +484,13 @@ class ProfileService {
                     'Ошибка сохранения пользователя');
             }
             $userId = $user->getId();
+
+            $email = new UserEmail();
+            $email->setEmail($emailStr);
+            $email->setIsActive(User::IS_NOT_ACTIVE);
+            $email->setUserId($userId);
         }
-
-        $email = new UserEmail();
-        $email->setEmail($emailStr);
-        $email->setIsActive(User::IS_NOT_ACTIVE);
-        $email->setUserId($userId);
-
+        
         $email->setHashByEmail($emailStr);
         if (!$email->save()) {
             return new ResultDTO(ResultDTO::FAIL, 'Ошибка сохранения email');
